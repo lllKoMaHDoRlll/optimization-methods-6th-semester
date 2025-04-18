@@ -1,4 +1,5 @@
 import math
+from typing import Callable
 
 def func(x):
     return x*x - 4 * x + 6
@@ -6,7 +7,7 @@ def func(x):
 
 PHI = (3 - math.sqrt(5)) / 2
 
-def find_min(a0: float, b0: float, epsilon: float):
+def find_min(func: Callable, a0: float, b0: float, epsilon: float):
     a = a0
     b = b0
     x_ = a + PHI * (b - a)
@@ -47,5 +48,5 @@ def find_min(a0: float, b0: float, epsilon: float):
         "R(N)": (0.618)**(k + 1)
     }
 
-
-print(find_min(0, 10, 0.5))
+if __name__ == '__main__':
+    print(find_min(func, 0, 10, 0.5))
