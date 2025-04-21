@@ -4,6 +4,7 @@ from typing import Callable
 def func(x):
     return x*x - 4 * x + 6
 
+DO_LOG = False
 
 PHI = (3 - math.sqrt(5)) / 2
 
@@ -16,11 +17,12 @@ def find_min(func: Callable, a0: float, b0: float, epsilon: float):
     f_y = func(y_)
     k = 0
     while b - a > epsilon:
-        print("=========")
-        print(k)
-        print(a, b)
-        print(x_, y_)
-        print(f_x, f_y)
+        if DO_LOG:
+            print("=========")
+            print(k)
+            print(a, b)
+            print(x_, y_)
+            print(f_x, f_y)
         k += 1
         if f_x <= f_y:
             b = y_
@@ -29,15 +31,15 @@ def find_min(func: Callable, a0: float, b0: float, epsilon: float):
             f_y = f_x
             f_x = func(x_)
 
-            print("new b: " + b.__str__())
+            if DO_LOG: print("new b: " + b.__str__())
         else:
             a = x_
             x_ = y_
             y_ = a + b - y_
             f_x = f_y
             f_y = func(y_)
-            print("new a: " + a.__str__())
-        print("========")
+            if DO_LOG: print("new a: " + a.__str__())
+        if DO_LOG: print("========")
     return {
         "min": (a + b) / 2,
         "func_min": func((a + b) / 2),
