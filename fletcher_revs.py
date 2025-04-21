@@ -1,17 +1,23 @@
 import math
+from golden_ratio_ import find_min
 
 def func(x: list[float]) -> float:
-    return 2 * x[0] * x[0] + x[0] * x[1] + x[1]*x[1]
+    return x[0]*x[0] + 5 * x[1] * x[1] + x[0] * x[1] + x[0]
 
-def find_min_t(x: list[float]) -> float:
-    return (
-        (4 * x[0] + x[1])**2 + (x[0] + 2 * x[1])**2
-    ) / (
-        4 * (4 * x[0] + x[1])**2 + 2 * (4 * x[0] + x[1]) * (x[0] + 2 * x[1]) + 2 * (x[0] + 2 * x[1])**2
-    )
+def find_min_t(x: list[float], d: list[float], epsilon) -> float:
+    return find_min(
+        lambda t: func([x[i] + t * d[i] for i in range(len(x))]),
+        0, 1, epsilon
+    )["min"]
 
 def grad(x: list[float]) -> list[float]:
-    return [4 * x[0] + x[1], x[0] + 2 * x[1]]
+    grad = [0. for _ in range(len(x))]
+    epsilon = 0.0001
+    for i in range(len(x)):
+        x_ = x[:]
+        x_[i] += epsilon
+        grad[i] =  (func(x_) - func(x)) / epsilon
+    return grad
 
 def norm(vec: list[float]) -> float:
     return math.sqrt(sum([el * el for el in vec]))
@@ -41,16 +47,21 @@ def fletcher_revs_method(x0: list[float], epsilon1: float, epsilon2: float, M: i
             break
 
         if k == 0:
-            d = [-1 * value for value in grad_value]
+            print("=========")
+            d = [-1 * grad_value[i] for i in range(len(x0))]
+            print(f"{d=}")
         else:
-            b = (norm(grad(x_prev)))/(norm(grad(x_prev_prev)))
-            d = [-1 * grad_value[i] + b * d[i] for i in range(len(x0))]
-        
-        t = find_min_t(x_prev, grad)
+            b = (norm(grad_value)) / (norm(grad(x_prev_prev)))
+            print(f"{b=}")
 
+            d = [-1 * grad_value[i] + b * d[i] for i in range(len(x0))]
+            print(f"{d=}")
+
+        t = find_min_t(x_prev, d, epsilon1)
         print(f"{t=}")
         x_next = [x_prev[i] + t * d[i] for i in range(len(x0))]
         print(f"{x_next=}")
+
         print(f"norm: {norm([x_next[i] - x_prev[i] for i in range(len(x0))])}, delta: {abs(func(x_next) - func(x_prev))}")
         if norm([x_next[i] - x_prev[i] for i in range(len(x0))]) < epsilon2 and abs(func(x_next) - func(x_prev)) < epsilon2:
             stop_condition_cur = True
@@ -71,4 +82,4 @@ def fletcher_revs_method(x0: list[float], epsilon1: float, epsilon2: float, M: i
         "condition": condition
     }
 
-print(fletcher_revs_method([0.5, 1], 0.1, 0.15, 10))
+print(fletcher_revs_method([1, 1], 0.1, 0.15, 10))
