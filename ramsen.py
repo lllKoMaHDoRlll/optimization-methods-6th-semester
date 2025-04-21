@@ -1,38 +1,61 @@
 import math
+from golden_ratio_ import find_min
 
 def func(x: list[float]) -> float:
-    return 2 * x[0] * x[0] + x[0] * x[1] + x[1]*x[1]
+    return x[0]*x[0] + 5 * x[1] * x[1] + x[0] * x[1] + x[0]
 
-def find_min_t(x: list[float]) -> float: # переделать
-    return (
-        (4 * x[0] + x[1])**2 + (x[0] + 2 * x[1])**2
-    ) / (
-        4 * (4 * x[0] + x[1])**2 + 2 * (4 * x[0] + x[1]) * (x[0] + 2 * x[1]) + 2 * (x[0] + 2 * x[1])**2
-    )
+def find_min_t(x: list[float], d: list[float], epsilon) -> float:
+    return find_min(
+        lambda t: func([x[i] + t * d[i] for i in range(len(x))]),
+        0, 1, epsilon
+    )["min"]
 
-def get_H():
+def get_H(x: list[float], h: float) -> list[list[float]]:
+    print([x[0] + h, x[1]])
+    print(func([x[0] + h, x[1]]))
     return [
-        [4, 1],
-        [1, 2]
+        [
+            (
+                func([x[0] + h, x[1]]) - 2 * func(x) + func([x[0] - h, x[1]])
+            ) / (h*h),
+            (
+                func([x[0] + h, x[1] + h]) - func([x[0] + h, x[1] - h]) - func([x[0] - h, x[1] + h]) + func([x[0] - h, x[1] - h])
+            ) / (4*h*h)
+        ],
+        [
+            (
+                func([x[0] + h, x[1] + h]) - func([x[0] + h, x[1] - h]) - func([x[0] - h, x[1] + h]) + func([x[0] - h, x[1] - h])
+            ) / (4*h*h),
+            (
+                func([x[0], x[1] + h]) - 2 * func(x) + func([x[0], x[1] - h])
+            ) / (h*h)
+        ]
     ]
 
-def get_inv_H():
+def get_inv_H(H: list[list[float]]):
+    det = H[0][0] * H[1][1] - H[0][1] * H[1][0]
     return [
-        [2/7, -1/7],
-        [-1/7, 4/7]
+        [H[1][1] / det, -1 * H[0][1] / det],
+        [-1 * H[1][0] / det, H[0][0] / det]
     ]
 
 def is_positive(matrix):
     return matrix[0][0] > 0 and (matrix[0][0] * matrix[1][1] - matrix[0][1]*matrix[1][0]) > 0 
 
 def grad(x: list[float]) -> list[float]:
-    return [4 * x[0] + x[1], x[0] + 2 * x[1]]
+    grad = [0. for _ in range(len(x))]
+    epsilon = 0.0001
+    for i in range(len(x)):
+        x_ = x[:]
+        x_[i] += epsilon
+        grad[i] =  (func(x_) - func(x)) / epsilon
+    return grad
 
 def norm(vec: list[float]) -> float:
     return math.sqrt(sum([el * el for el in vec]))
 
 
-def newton_method(x0: list[float], epsilon1: float, epsilon2: float, M: int):
+def ramsen_method(x0: list[float], epsilon1: float, epsilon2: float, M: int):
     k = 0
     x_prev = x0[:]
     x_next = x0[:]
@@ -53,16 +76,18 @@ def newton_method(x0: list[float], epsilon1: float, epsilon2: float, M: int):
             x_min = x_prev
             condition = "2"
             break
-        # t = find_min_t(x_prev, grad)
-        H = get_H()
-        inv_H = get_inv_H()
+        H = get_H(x_prev, 0.0001)
+        print(f"{H=}")
+        inv_H = get_inv_H(H)
+        print(f"{inv_H=}")
         if is_positive(inv_H):
-            dk = [-1 * sum([inv_H[i][j] * grad_value[j] for j in range(len(x0))]) for i in range(len(x0))]
+            d = [ -1 * sum([inv_H[i][j] * grad_value[j] for j in range(len(x0))]) for i in range(len(x0))]
         else:
-            dk = [-1 * grad_value[i] for i in range(len(x0))]
-        print(f"{dk=}")
-        t = find_min_t(x_prev)
-        x_next = [x_prev[i] - t * dk[i] for i in range(len(x0))]
+            d = [-1 * grad_value[i] for i in range(len(x0))]
+        t = find_min_t(x_prev, d, epsilon1)
+        print(f"{d=}")
+        print(f"{t=}")
+        x_next = [x_prev[i] + t * d[i] for i in range(len(x0))]
         print(f"{x_next=}")
         print(f"norm: {norm([x_next[i] - x_prev[i] for i in range(len(x0))])}, delta: {abs(func(x_next) - func(x_prev))}")
         if norm([x_next[i] - x_prev[i] for i in range(len(x0))]) < epsilon2 and abs(func(x_next) - func(x_prev)) < epsilon2:
@@ -83,4 +108,4 @@ def newton_method(x0: list[float], epsilon1: float, epsilon2: float, M: int):
         "condition": condition
     }
 
-print(newton_method([0.5, 1], 0.1, 0.15, 10))
+print(ramsen_method([1, 1], 0.1, 0.15, 10))
