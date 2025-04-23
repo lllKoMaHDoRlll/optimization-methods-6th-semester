@@ -51,7 +51,7 @@ def fletcher_revs_method(x0: list[float], epsilon1: float, epsilon2: float, M: i
             d = [-1 * grad_value[i] for i in range(len(x0))]
             print(f"{d=}")
         else:
-            b = (norm(grad_value)) / (norm(grad(x_prev_prev)))
+            b = ((norm(grad_value)) / (norm(grad(x_prev_prev))))**2
             print(f"{b=}")
 
             d = [-1 * grad_value[i] + b * d[i] for i in range(len(x0))]
@@ -74,7 +74,7 @@ def fletcher_revs_method(x0: list[float], epsilon1: float, epsilon2: float, M: i
         x_prev = x_next
         stop_condition_prev = stop_condition_cur
         stop_condition_cur = False
-    
+
     return {
         "x*": x_min,
         "f(x*)": func(x_min),
