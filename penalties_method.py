@@ -33,7 +33,7 @@ def penalties_method(
 
         table.append({
             "k": k,
-            "r": 1,
+            "r": r,
             "x": x,
             "F(x, r)": F(x, r),
             "P(x, r)": P(x, r),
