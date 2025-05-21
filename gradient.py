@@ -49,7 +49,7 @@ def gradient_decrease(x0: list[float], epsilon1: float, epsilon2: float, M: int)
         print(f"{x_next=}")
         print(f"norm: {norm([x_next[i] - x_prev[i] for i in range(len(x0))])}, delta: {abs(func(x_next) - func(x_prev))}")
         if norm([x_next[i] - x_prev[i] for i in range(len(x0))]) < epsilon2 and abs(func(x_next) - func(x_prev)) < epsilon2:
-            
+
             stop_condition_cur = True
             if stop_condition_prev and stop_condition_cur:
                 x_min = x_next
@@ -59,7 +59,7 @@ def gradient_decrease(x0: list[float], epsilon1: float, epsilon2: float, M: int)
         x_prev = x_next
         stop_condition_prev = stop_condition_cur
         stop_condition_cur = False
-    
+
     return {
         "x*": x_min,
         "f(x*)": func(x_min),
